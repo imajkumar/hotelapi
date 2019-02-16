@@ -36,7 +36,7 @@ class ApiController extends Controller
 
     //::getLocation
 
-    public function getOffer(Request $request){
+    public function getLocation(Request $request){
       try{
         $search = $request->s;
 
