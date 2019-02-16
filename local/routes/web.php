@@ -21,6 +21,7 @@ $router->get('user/verify/{verification_code}', 'AuthController@verifyUser');
 $router->post('register', 'AuthController@register');
 $router->post('getoffer', 'ApiController@getOffer');
 $router->post('getLocation', 'ApiController@getLocation');
+$router->post('getHotel', 'ApiController@getHotel');
 
 $router->post('login', 'AuthController@login');
 

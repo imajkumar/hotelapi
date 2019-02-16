@@ -6,6 +6,8 @@ use DB;
 use App\User;
 use App\Offer;
 use App\Location;
+use App\Hotel;
+
 
 use App\forgetPasswords;
 use Validator;
@@ -33,7 +35,19 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
+    //::getHotel
+    public function getHotel(Request $request){
+      try{
 
+        $hotels = Hotel::where('location_id',$request->location_id)
+                      ->get();
+        return $this->setSuccessResponse($hotels);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+    //getHotel::
     //::getLocation
 
     public function getLocation(Request $request){
