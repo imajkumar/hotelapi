@@ -70,10 +70,12 @@ class ApiController extends Controller
         $bus_offer=Offer::where('offer_type',0)->get();
         $flight_offer=Offer::where('offer_type',1)->get();
         $hotel_offer=Offer::where('offer_type',2)->get();
+        $cab_offer=Offer::where('offer_type',2)->get();
         $data_ = array(
           'bus' => $bus_offer,
           'flight' => $flight_offer,
-          'hotel' => $hotel_offer
+          'hotel' => $hotel_offer,
+          'cab' => $cab_offer
         );
         return $this->setSuccessResponse($data_);
       }
