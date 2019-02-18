@@ -67,8 +67,15 @@ class ApiController extends Controller
     //::get Offer
     public function getOffer(Request $request){
       try{
-        $offer=Offer::get();
-        return $this->setSuccessResponse($offer);
+        $bus_offer=Offer::where('offer_type',0)->get();
+        $flight_offer=Offer::where('offer_type',1)->get();
+        $hotel_offer=Offer::where('offer_type',2)->get();
+        $data_ = array(
+          'bus' => $bus_offer,
+          'flight' => $flight_offer,
+          'hotel' => $hotel_offer
+        );
+        return $this->setSuccessResponse($data_);
       }
       catch(\Exception $ex){
         return $this->setErrorResponse($ex->getMessage());
