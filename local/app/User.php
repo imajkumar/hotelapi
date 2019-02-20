@@ -88,7 +88,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [];
     }
 
-    
+
      public function login_($data) {
        $user_data = $this->where(
                       function ($query) use ($data) {
