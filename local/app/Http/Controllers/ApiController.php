@@ -7,8 +7,6 @@ use App\User;
 use App\Offer;
 use App\Location;
 use App\Hotel;
-
-
 use App\forgetPasswords;
 use Validator;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +34,17 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
-
+    //::getHotels
+    public function getHotels(Request $request){
+      try{
+        $hotels = Hotel::all();
+        return $this->setSuccessResponse($hotels);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+    //getHotels::
     //::guest
     public function guest(Request $request)
     {
