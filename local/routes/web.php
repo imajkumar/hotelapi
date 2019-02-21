@@ -23,6 +23,7 @@ $router->post('guest', 'ApiController@guest');  //unknown user
 
 $router->post('getoffer', 'ApiController@getOffer');
 $router->post('hotels', 'ApiController@getHotels');
+$router->post('rooms', 'ApiController@rooms');
 $router->post('getLocation', 'ApiController@getLocation');
 $router->post('getHotel', 'ApiController@getHotel');
 

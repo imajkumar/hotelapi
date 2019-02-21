@@ -34,6 +34,18 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
+    //::rooms
+    public function getRooms(Request $request){
+      try{
+        $hotels = Hotel::where('hotal_id',$request->hotel_id)
+                      ->get();
+        return $this->setSuccessResponse($hotels);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+    //rooms::
     //::getHotels
     public function getHotels(Request $request){
       try{
