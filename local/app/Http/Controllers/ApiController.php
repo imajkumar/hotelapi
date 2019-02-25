@@ -7,6 +7,7 @@ use App\User;
 use App\Offer;
 use App\Location;
 use App\Hotel;
+use App\GuestUser;
 use App\forgetPasswords;
 use Validator;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,24 @@ class ApiController extends Controller
       }
     }
     //getHotels::
+    //::getGuest
+    public function getGuest(Request $request){
+      try{
+        $guestuser = GuestUser::where('token',$request->token)->first();
+        $data = array(
+          'token' =>(!isset($guestuser->token) || is_null($guestuser->token)) ? '' : $guestuser->token,
+          'email' =>(!isset($guestuser->email) || is_null($guestuser->email)) ? '' : $guestuser->email,
+          'phone' =>(!isset($guestuser->phone) || is_null($guestuser->phone)) ? '' : $guestuser->phone,
+          'device_id' =>$guestuser->device_id          
+        );
+        return $this->setSuccessResponse($data);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+
+    //getGuest::
     //::guest
     public function guest(Request $request)
     {
@@ -64,7 +83,7 @@ class ApiController extends Controller
         $credentials = $request->only('device_id');
 
         $rules = [
-            'device_id' => 'required|unique:users'
+            'device_id' => 'required|unique:guest_user'
 
         ];
         $validator = Validator::make($credentials, $rules);
@@ -74,25 +93,13 @@ class ApiController extends Controller
             return $this->setErrorResponse($validator->messages());
 
         }
-        $users = new User;
+          $token =  uniqid(base64_encode(str_random(60)));
+
+        $users = new GuestUser;
         $users->device_id = $request->device_id;
+        $users->token = $token;
         $users->save();
         $insertedId = $users->id;
-        $user = User::find($insertedId);
-
-        try {
-            // attempt to verify the credentials and create a token for the user
-            if (! $token = JWTAuth::fromUser($user))
-            {
-                return response()->json(['success' => false, 'error' => 'We cant find an account with this credentials. Please make sure you entered the right information and you have verified your email address.'], 404);
-            }
-        } catch (JWTException $e)
-        {
-            // something went wrong whilst attempting to encode the token
-            return response()->json(['success' => false, 'error' => 'Failed to login, please try again.'], 500);
-        }
-
-      //  $token = $this->respondWithToken($token);
         return $this->setSuccessResponse([],"SUCCESS-LOGIN",$token);
 
       }

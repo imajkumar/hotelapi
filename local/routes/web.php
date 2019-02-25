@@ -20,6 +20,7 @@ $router->get('user/verify/{verification_code}', 'AuthController@verifyUser');
 
 $router->post('register', 'AuthController@register');
 $router->post('guest', 'ApiController@guest');  //unknown user
+$router->post('getGuest', 'ApiController@getGuest');  //unknown user
 
 $router->post('getoffer', 'ApiController@getOffer');
 $router->post('hotels', 'ApiController@getHotels');
