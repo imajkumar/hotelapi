@@ -9,6 +9,8 @@ use App\Location;
 use App\Hotel;
 use App\GuestUser;
 use App\Reference;
+use App\BookRoom;
+use App\Room;
 
 use App\forgetPasswords;
 use Validator;
@@ -37,12 +39,45 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
+    //::roomBooking
+
+    public function roomBooking(Request $request){
+      try{
+        echo "string";
+
+        $users = new BookRoom;
+        $users->hotel_id = $request->hotel_id;
+        $users->room_id = $request->room_id;
+        $users->device_id = $request->device_id;
+        $users->user_id = $request->user_id;
+        $users->check_in = $request->check_in;
+        $users->check_out = $request->check_out;
+        $users->adult = $request->adult;
+        $users->child = $request->child;
+        $users->infant = $request->infant;
+        $users->offer_cpde = $request->offer_code;
+        $users->booking_type =1;
+        $users->save();
+        $insertedId = $users->id;
+        Room::where('hotal_id',  $request->hotel_id)
+          ->where('room_id', $request->room_id)
+          ->update(['status' => 2]);
+
+        return $this->setSuccessResponse([],"Booked Saved succesfully",$insertedId);
+
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+
+
+    //roomBooking::
+
     //::getReference
     public function getReference(Request $request){
       try{
 
-       
-       
 
         $Reference = Reference::where('device_id',$request->device_id)
                       ->get();
