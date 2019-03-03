@@ -27,6 +27,8 @@ $router->post('hotels', 'ApiController@getHotels');
 $router->post('rooms', 'ApiController@rooms');
 $router->post('getLocation', 'ApiController@getLocation');
 $router->post('getHotel', 'ApiController@getHotel');
+$router->post('SetReference', 'ApiController@SetReference');
+$router->post('getReference', 'ApiController@getReference');
 
 $router->post('login', 'AuthController@login');
 

@@ -8,6 +8,8 @@ use App\Offer;
 use App\Location;
 use App\Hotel;
 use App\GuestUser;
+use App\Reference;
+
 use App\forgetPasswords;
 use Validator;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +37,48 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
+    //::getReference
+    public function getReference(Request $request){
+      try{
+
+        $json = file_get_contents('https://s3.ap-south-1.amazonaws.com/cdnmaster/www/location.json');
+        $obj = json_decode($json);
+        foreach ($obj as $key => $value) {
+          $users = new Location;
+          $users->id = $value->CityId;
+          $users->display_name = $value->CityName;
+          $users->save();
+        }
+
+        die;
+
+        $Reference = Reference::where('device_id',$request->device_id)
+                      ->get();
+        return $this->setSuccessResponse($Reference);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+    //getReference::
+    //::SetReference
+    public function SetReference(Request $request){
+      try{
+        $users = new Reference;
+        $users->device_id = $request->device_id;
+        $users->reference_no = $request->reference_no;
+        $users->reference_type = $request->reference_type;
+        $users->save();
+        $insertedId = $users->id;
+        return $this->setSuccessResponse([],"Reference Saved succesfully",$insertedId);
+
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+
+    //SetReference::
     //::rooms
     public function getRooms(Request $request){
       try{
@@ -66,7 +110,7 @@ class ApiController extends Controller
           'token' =>(!isset($guestuser->token) || is_null($guestuser->token)) ? '' : $guestuser->token,
           'email' =>(!isset($guestuser->email) || is_null($guestuser->email)) ? '' : $guestuser->email,
           'phone' =>(!isset($guestuser->phone) || is_null($guestuser->phone)) ? '' : $guestuser->phone,
-          'device_id' =>$guestuser->device_id          
+
         );
         return $this->setSuccessResponse($data);
       }
