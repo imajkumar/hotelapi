@@ -41,16 +41,8 @@ class ApiController extends Controller
     public function getReference(Request $request){
       try{
 
-        $json = file_get_contents('https://s3.ap-south-1.amazonaws.com/cdnmaster/www/location.json');
-        $obj = json_decode($json);
-        foreach ($obj as $key => $value) {
-          $users = new Location;
-          $users->id = $value->CityId;
-          $users->display_name = $value->CityName;
-          $users->save();
-        }
-
-        die;
+       
+       
 
         $Reference = Reference::where('device_id',$request->device_id)
                       ->get();
