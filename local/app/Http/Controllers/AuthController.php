@@ -33,10 +33,11 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $credentials = $request->only('name', 'email', 'password');
+        $credentials = $request->only('name', 'email', 'password','device_id');
 
         $rules = [
             'name' => 'required|max:255',
+            'device_id' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users'
         ];
 
@@ -50,8 +51,8 @@ class AuthController extends Controller
         $name = $request->name;
         $email = $request->email;
         $password = $request->password;
-
-        $user = User::create(['name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
+        $device_id = $request->device_id;
+        $user = User::create(['device_id' =>$device_id,'name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
 
         $verification_code = str_random(30);
 

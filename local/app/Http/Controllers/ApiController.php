@@ -39,11 +39,24 @@ class ApiController extends Controller
     {
       //  return Auth::guard();
     }
+    //getProfile::
+    public function getProfile(Request $request){
+      try{
+
+
+        $Reference = User::where('device_id',$request->device_id)
+                      ->get();
+        return $this->setSuccessResponse($Reference);
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+    }
+    //::getProfile
     //::roomBooking
 
     public function roomBooking(Request $request){
       try{
-        echo "string";
 
         $users = new BookRoom;
         $users->hotel_id = $request->hotel_id;

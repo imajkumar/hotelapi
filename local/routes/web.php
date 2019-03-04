@@ -31,6 +31,8 @@ $router->post('roomBooking', 'ApiController@roomBooking');
 
 $router->post('SetReference', 'ApiController@SetReference');
 $router->post('getReference', 'ApiController@getReference');
+$router->post('getProfile', 'ApiController@getProfile');
+
 
 $router->post('login', 'AuthController@login');
 
