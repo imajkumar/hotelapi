@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use DB;
 use App\User;
+use App\Referral;
+
 use App\forgetPasswords;
 use Validator;
 use Illuminate\Support\Facades\Auth;
@@ -33,11 +35,41 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $credentials = $request->only('name', 'email', 'password','device_id');
+
+        $name = $request->name;
+        $email = $request->email;
+        $password = $request->password;
+        $device_id = $request->device_id;
+        $photo = $request->photo;
+        $provider = $request->provider;
+        $users = User::where('email', $request->email)->get();
+         if(sizeof($users) > 0){
+               $user_arr = User::where('email',$email)->first()->toArray();
+        foreach ($user_arr as $key => $value) {
+        if (is_null($value)) {
+             $user_arr[$key] = "";
+        }
+
+    }
+    $user_arr_data = Referral::where('user_id',$users[0]->id)->first()->toArray();
+
+    $result = array_merge($user_arr_data, $user_arr);
+
+
+
+        return $this->setSuccessResponse($result,"Welcome back",'oo');
+
+         }
+
+
+
+
+
+        $credentials = $request->only('name', 'email', 'password','device_id','photo','provider');
 
         $rules = [
             'name' => 'required|max:255',
-            'device_id' => 'required|max:255',
+            'device_id' => 'required',
             'email' => 'required|email|max:255|unique:users'
         ];
 
@@ -48,13 +80,11 @@ class AuthController extends Controller
             return response()->json(['success'=> false, 'error'=> $validator->messages()]);
         }
 
-        $name = $request->name;
-        $email = $request->email;
-        $password = $request->password;
-        $device_id = $request->device_id;
-        $user = User::create(['device_id' =>$device_id,'name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
+
+        $user = User::create(['image'=>$photo,'provider'=>$provider,'device_id' =>$device_id,'name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
 
         $verification_code = str_random(30);
+        Referral::create(['user_id'=>$user->id,'referral_code'=>$verification_code,'referral_point'=>0]);
 
         DB::table('user_verifications')->insert(['user_id'=>$user->id,'token'=>$verification_code]);
 
@@ -63,8 +93,21 @@ class AuthController extends Controller
         $subject = "Please verify your email address.";
 
         $this->sendEmailNotification($email_template, $email, $name, $subject, $verification_code);
+        $user_arr = User::where('email',$email)->first()->toArray();
+        foreach ($user_arr as $key => $value) {
+    if (is_null($value)) {
+         $user_arr[$key] = "";
+    }
+}
 
-        return response()->json(['success'=> true, 'message'=> 'Thanks for signing up! Please check your email to complete your registration.']);
+  $user_arr_data = Referral::where('user_id',$user->id)->first()->toArray();
+
+  $result = array_merge($user_arr_data, $user_arr);
+
+
+        return $this->setSuccessResponse($result,"Registedred Saved succesfully",'oo');
+
+
 
     }
 
@@ -98,6 +141,8 @@ class AuthController extends Controller
         return response()->json(['success'=> false, 'error'=> "Verification code is invalid."]);
 
     }
+
+
     public function login(Request $request)
     {
       try{

@@ -35,6 +35,138 @@ class ApiController extends Controller
       //  $this->middleware('auth:api', ['except' => ['getOffer']]);
     }
 
+    public function oderidCheck(Request $request){
+      $user = DB::table('pay_trans')->where('orderid', $request->orderid)->first();
+      if($user==null){
+        $f=false;
+
+      }else {
+        $f=true;
+      }
+    return $this->setSuccessResponse($f,"get Transation Syatis",$user);
+    }
+    public function vpaytm(Request $request){
+      header("Pragma: no-cache");
+      header("Cache-Control: no-cache");
+      header("Expires: 0");
+
+      // following files need to be included
+      require_once("pay/config_paytm.php");
+      require_once("pay/encdec_paytm.php");
+
+      $paytmChecksum = "";
+      $paramList = array();
+      $isValidChecksum = FALSE;
+
+      $paramList = $_POST;
+      $return_array = $_POST;
+      $paytmChecksum = isset($_POST["CHECKSUMHASH"]) ? $_POST["CHECKSUMHASH"] : ""; //Sent by Paytm pg
+
+      //Verify all parameters received from Paytm pg to your application. Like MID received from paytm pg is same as your application’s MID, TXN_AMOUNT and ORDER_ID are same as what was sent by you to Paytm PG for initiating transaction etc.
+      $isValidChecksum = verifychecksum_e($paramList, PAYTM_MERCHANT_KEY, $paytmChecksum); //will return TRUE or FALSE string.
+
+      // if ($isValidChecksum===TRUE)
+      // 	$return_array["IS_CHECKSUM_VALID"] = "Y";
+      // else
+      // 	$return_array["IS_CHECKSUM_VALID"] = "N";
+
+      $return_array["IS_CHECKSUM_VALID"] = $isValidChecksum ? "Y" : "N";
+      //$return_array["TXNTYPE"] = "";
+      //$return_array["REFUNDAMT"] = "";
+      unset($return_array["CHECKSUMHASH"]);
+
+      $encoded_json = htmlentities(json_encode($return_array));
+      $insertedId=DB::table('pay_trans')->insert(
+        ['provider' => 'paytm',
+        'orderid' => $_POST['ORDERID'],
+        'data' => $encoded_json]
+      );
+      return $this->setSuccessResponse([],"Saved Transation",$insertedId);
+
+
+    }
+    public function gpaytm(Request $request){
+      header("Pragma: no-cache");
+      header("Cache-Control: no-cache");
+      header("Expires: 0");
+      // following files need to be included
+      require_once("pay/config_paytm.php");
+      require_once("pay/encdec_paytm.php");
+      $checkSum = "";
+
+      // below code snippet is mandatory, so that no one can use your checksumgeneration url for other purpose .
+      $findme   = 'REFUND';
+      $findmepipe = '|';
+
+      $paramList = array();
+      $orderid=$_POST['ORDER_ID'];
+      $CUST_ID=$_POST['CUST_ID'];
+
+      $paramList["MID"] = '';
+      $paramList["ORDER_ID"] = $orderid;
+      $paramList["CUST_ID"] =$CUST_ID;
+      $paramList["INDUSTRY_TYPE_ID"] = '';
+      $paramList["CHANNEL_ID"] = '';
+      $paramList["TXN_AMOUNT"] = '';
+      $paramList["WEBSITE"] = 'WEBSTAGING';
+
+      foreach($_POST as $key=>$value)
+      {
+        $pos = strpos($value, $findme);
+        $pospipe = strpos($value, $findmepipe);
+        if ($pos === false || $pospipe === false)
+          {
+              $paramList[$key] = $value;
+          }
+      }
+
+
+
+      //Here checksum string will return by getChecksumFromArray() function.
+      $checkSum = getChecksumFromArray($paramList,PAYTM_MERCHANT_KEY);
+      //print_r($_POST);
+       echo json_encode(array("CHECKSUMHASH" => $checkSum,"ORDER_ID" => $orderid, "payt_STATUS" => "1"),JSON_UNESCAPED_SLASHES);
+        //Sample response return to SDK
+
+      //  {"CHECKSUMHASH":"GhAJV057opOCD3KJuVWesQ9pUxMtyUGLPAiIRtkEQXBeSws2hYvxaj7jRn33rTYGRLx2TosFkgReyCslu4OUj\/A85AvNC6E4wUP+CZnrBGM=","ORDER_ID":"asgasfgasfsdfhl7","payt_STATUS":"1"}
+
+
+
+    }
+
+    public function loginwithotp(Request $request){
+          try{
+            $credentials = $request->only('phone', 'device_id');
+            $rules = [
+                'phone' => 'required',
+                'device_id' => 'required',
+            ];
+            $validator = Validator::make($credentials, $rules);
+
+            if($validator->fails()) {
+                throw new Exception('UserController-004');
+
+            }
+            $user_arr=User::where('phone',$request->phone)->where('device_id',$request->device_id)->first();
+            if($user_arr===null){
+              $user = User::create(['otp_verified'=>$request->otp_verified,'provider'=>'','device_id' =>$request->device_id,'phone' => $request->phone, 'email' => '', 'password' => Hash::make('44444')]);
+                return $this->setSuccessResponse($user,"User List",'oo');
+
+            }else{
+               User::where('phone', $request->phone)
+          ->where('device_id', $request->device_id)
+          ->update(['otp_verified' => 1]);
+
+              return $this->setSuccessResponse($user_arr,"User List",'oo');
+
+            }
+
+          }
+          catch(JWTException $e){
+              return response()->json(['success' => false, 'error' => 'Failed to login, please try again.'], 500);
+          }
+    }
+
     public function guard()
     {
       //  return Auth::guard();
@@ -91,10 +223,16 @@ class ApiController extends Controller
     public function getReference(Request $request){
       try{
 
+ $user_arr = Reference::where('device_id',$request->device_id)->orderBy('id', 'DESC')->get()->toArray();
+        foreach ($user_arr as $key => $value) {
+    if (is_null($value)) {
+         $user_arr[$key] = "";
+    }
+}
 
-        $Reference = Reference::where('device_id',$request->device_id)
-                      ->get();
-        return $this->setSuccessResponse($Reference);
+       // $Reference = Reference::where('device_id',$request->device_id)                  ->get();
+
+        return $this->setSuccessResponse($user_arr);
       }
       catch(\Exception $ex){
         return $this->setErrorResponse($ex->getMessage());
@@ -108,6 +246,7 @@ class ApiController extends Controller
         $users->device_id = $request->device_id;
         $users->reference_no = $request->reference_no;
         $users->reference_type = $request->reference_type;
+        $users->detail = $request->detail;
         $users->save();
         $insertedId = $users->id;
         return $this->setSuccessResponse([],"Reference Saved succesfully",$insertedId);
@@ -122,7 +261,7 @@ class ApiController extends Controller
     //::rooms
     public function getRooms(Request $request){
       try{
-        $hotels = Hotel::where('hotal_id',$request->hotel_id)
+        $hotels = Room::where('hotal_id',$request->hotel_id)
                       ->get();
         return $this->setSuccessResponse($hotels);
       }
