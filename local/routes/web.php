@@ -41,6 +41,9 @@ $router->post('loginwithotp', 'ApiController@loginwithotp');
 $router->post('gpaytm', 'ApiController@gpaytm');
 $router->post('vpaytm', 'ApiController@vpaytm');
 $router->post('oderidCheck', 'ApiController@oderidCheck');
+$router->post('setHotelWizard', 'ApiController@setHotelWizard');
+$router->post('getAmenties', 'ApiController@getAmenties');
+$router->post('getHotelPermissioms', 'ApiController@getHotelPermissioms');
 
 
 

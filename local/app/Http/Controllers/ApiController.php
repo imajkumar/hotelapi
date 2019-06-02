@@ -10,6 +10,9 @@ use App\Hotel;
 use App\GuestUser;
 use App\Reference;
 use App\BookRoom;
+use App\HotelAmities;
+use App\HotelPermissions;
+
 use App\Room;
 
 use App\forgetPasswords;
@@ -34,7 +37,66 @@ class ApiController extends Controller
     {
       //  $this->middleware('auth:api', ['except' => ['getOffer']]);
     }
+    public function getAmenties(Request $request){
+      
+      $user = DB::table('amenities')->get();
+      return $user;
+    }
+    public function getHotelPermissioms(Request $request){
+      
+      $user = DB::table('hotels_permi')->get();
+      return $user;
+    }
+    
 
+
+    public function setHotelWizard(Request $request){
+     
+
+       
+       
+      
+
+      try{
+
+        $users = new Hotel;
+        $users->name = $request->hotel_name;
+        $users->hotel_address = $request->hotel_address;
+        $users->city = $request->city;
+        $users->no_rooms = $request->no_rooms;
+        $users->no_resturant = $request->no_resturant;
+        $users->railway_distance = $request->railway_distance;
+        $users->bus_distance = $request->bus_distance;
+       
+        $users->save();
+        $insertedId = $users->id;
+        
+       
+        foreach ($request->hotel_ameties_data as $key => $value) {
+          $users = new HotelAmities;
+          $users->hotel_id = $insertedId;
+          $users->amenties_id =$value;              
+          $users->save();
+           }
+
+        foreach ($request->hotel_permission_data as $key => $value) {
+        $users = new HotelPermissions;
+        $users->hotel_id = $insertedId;
+        $users->amenities_id =$value;              
+        $users->save();
+         }
+
+        
+        
+        return $this->setSuccessResponse([],"Saved succesfully",$insertedId);
+
+      }
+      catch(\Exception $ex){
+        return $this->setErrorResponse($ex->getMessage());
+      }
+
+
+    }
     public function oderidCheck(Request $request){
       $user = DB::table('pay_trans')->where('orderid', $request->orderid)->first();
       if($user==null){
