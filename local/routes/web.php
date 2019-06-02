@@ -25,14 +25,27 @@ $router->post('getGuest', 'ApiController@getGuest');  //unknown user
 $router->post('getoffer', 'ApiController@getOffer');
 $router->post('hotels', 'ApiController@getHotels');
 $router->post('rooms', 'ApiController@rooms');
+$router->post('getRoom', 'ApiController@getRooms');
+
 $router->post('getLocation', 'ApiController@getLocation');
 $router->post('getHotel', 'ApiController@getHotel');
 $router->post('roomBooking', 'ApiController@roomBooking');
 
 $router->post('SetReference', 'ApiController@SetReference');
 $router->post('getReference', 'ApiController@getReference');
+$router->post('getProfile', 'ApiController@getProfile');
+
 
 $router->post('login', 'AuthController@login');
+$router->post('loginwithotp', 'ApiController@loginwithotp');
+$router->post('gpaytm', 'ApiController@gpaytm');
+$router->post('vpaytm', 'ApiController@vpaytm');
+$router->post('oderidCheck', 'ApiController@oderidCheck');
+$router->post('setHotelWizard', 'ApiController@setHotelWizard');
+$router->post('getAmenties', 'ApiController@getAmenties');
+$router->post('getHotelPermissioms', 'ApiController@getHotelPermissioms');
+
+
 
 
 $router->post('recover-request', 'AuthController@recoverRequest');
